@@ -2,10 +2,11 @@ import gradio as gr
 from openai import OpenAI
 import json
 import os
+from sys import stderr
 from dotenv import load_dotenv
 import time
 import threading
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 from src.brick_agent_tools import *
 from src.brick_agent_functions import *
@@ -100,10 +101,15 @@ def open_browser():
         browser = p.firefox.launch(headless=False)
         page = browser.new_page()
         page.goto("http://localhost:7860")
-        page.wait_for_timeout(99999)
+        while page.url:
+            time.sleep(1)
 
 
 if __name__ == "__main__":
     gr.close_all()
-    threading.Thread(target=open_browser, daemon=True).start()
-    gr.ChatInterface(fn=chat).launch()
+    try:
+        threading.Thread(target=open_browser, daemon=True).start()
+        gr.ChatInterface(fn=chat).launch()
+    except Exception as e:
+        print(f"Well, clearly something unexpecter has happened. Here's the breakdown for you: {e}", file=stderr)
+        
