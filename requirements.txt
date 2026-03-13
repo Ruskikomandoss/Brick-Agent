@@ -1,0 +1,6 @@
+gradio
+openai
+python-dotenv
+playwright
+pandas
+requests
